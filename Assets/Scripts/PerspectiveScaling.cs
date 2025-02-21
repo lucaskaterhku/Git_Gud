@@ -1,6 +1,6 @@
 using UnityEngine;
  
-public class Superliminal : MonoBehaviour
+public class PerspectiveScaling : MonoBehaviour
 {
     [Header("Components")]
     public Transform target;            // The target object we picked up for scaling
