@@ -1,28 +1,47 @@
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
 
 /// <summary>
-/// Represents a scale that detects an object and displays its weight.
+/// Represents a scale that detects objects and displays their weight.
 /// </summary>
 public class Scale : MonoBehaviour
 {
     [Header("UI Settings")]
     [SerializeField] private TextMeshProUGUI weightDisplay;
 
-    private void OnTriggerStay(Collider other)
+    private readonly List<Weight> objectsOnScale = new List<Weight>();
+
+    private void OnTriggerEnter(Collider other)
     {
         Weight weight = other.GetComponent<Weight>();
-
-        if (weight != null)
+        if (weight != null && !this.objectsOnScale.Contains(weight))
         {
-            float objectMass = weight.GetMass();
-            this.UpdateDisplay(objectMass);
+            this.objectsOnScale.Add(weight);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        this.UpdateDisplay(0);
+        Weight weight = other.GetComponent<Weight>();
+        if (weight != null && this.objectsOnScale.Contains(weight))
+        {
+            this.objectsOnScale.Remove(weight);
+        }
+    }
+
+    private void Update()
+    {
+        float totalMass = 0f;
+
+        this.objectsOnScale.RemoveAll(item => item == null);
+
+        foreach (Weight weight in this.objectsOnScale)
+        {
+            totalMass += weight.GetMass();
+        }
+
+        this.UpdateDisplay(totalMass);
     }
 
     /// <summary>
