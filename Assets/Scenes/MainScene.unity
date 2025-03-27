@@ -11656,7 +11656,6 @@ MonoBehaviour:
   ignoreTargetMask:
     serializedVersion: 2
     m_Bits: 55
-  offsetFactor: 1
 --- !u!33 &9111950143521689110
 MeshFilter:
   m_ObjectHideFlags: 0

@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Manages the perspective scaling of objects when picked up by the player.
-/// Allows resizing of objects based on distance and raycasting to avoid clipping.
+/// Also handles prevention of clipping through other objects like walls.
 /// </summary>
 public class PerspectiveScaling : MonoBehaviour
 {
@@ -12,8 +12,7 @@ public class PerspectiveScaling : MonoBehaviour
     [Header("Parameters")]
     public LayerMask targetMask;        
     public LayerMask ignoreTargetMask;   
-    public float offsetFactor;           
-
+            
     private float originalDistance;      
     private float originalScale;        
     private Vector3 targetScale;       
@@ -85,7 +84,7 @@ public class PerspectiveScaling : MonoBehaviour
     }
 
     /// <summary>
-    /// Resizes the target object based on the player's view and raycast distance.
+    /// Resizes the target object based on the player's view and raycast distance, preventing clipping.
     /// </summary>
     private void ResizeTarget()
     {
@@ -97,13 +96,45 @@ public class PerspectiveScaling : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(this.transform.position, this.transform.forward, out hit, Mathf.Infinity, this.ignoreTargetMask))
         {
-            this.target.position = hit.point - this.transform.forward * this.offsetFactor * this.targetScale.x;
+            Collider targetCollider = this.target.GetComponent<Collider>();
+            if (targetCollider == null)
+            {
+                Debug.LogWarning("Target has no collider!");
+                return;
+            }
 
-            float currentDistance = Vector3.Distance(this.transform.position, this.target.position);
-            float scaleRatio = currentDistance / this.originalDistance;
+            Quaternion rotation = this.target.rotation;
+            Vector3 direction = this.transform.forward;
 
-            this.targetScale = Vector3.one * scaleRatio;
+            const float step = 0.01f;
+            const float minDistance = 0.2f; 
+            float distance = Vector3.Distance(this.transform.position, hit.point);
+
+            while (distance > minDistance)
+            {
+                float scaleRatio = distance / this.originalDistance;
+                Vector3 scaledScale = Vector3.one * scaleRatio;
+                Vector3 finalScale = scaledScale * this.originalScale;
+                Vector3 halfExtents = (finalScale / 2f) * 0.98f;
+
+                Vector3 position = this.transform.position + direction * distance;
+                Vector3 offsetPosition = position - direction * scaledScale.x;
+
+                if (Physics.OverlapBox(offsetPosition, halfExtents, rotation, this.ignoreTargetMask).Length == 0)
+                {
+                    this.targetScale = scaledScale;
+                    this.target.localScale = finalScale;
+                    this.target.position = offsetPosition;
+                    return;
+                }
+
+                distance -= step;
+            }
+
+            float fallbackScaleRatio = minDistance / this.originalDistance;
+            this.targetScale = Vector3.one * fallbackScaleRatio;
             this.target.localScale = this.targetScale * this.originalScale;
+            this.target.position = this.transform.position + direction * minDistance;
         }
     }
 }
