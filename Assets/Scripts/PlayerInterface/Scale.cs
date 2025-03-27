@@ -11,28 +11,28 @@ public class Scale : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        WeightManager weightManager = other.GetComponent<WeightManager>();
+        Weight weight = other.GetComponent<Weight>();
 
-        if (weightManager != null)
+        if (weight != null)
         {
-            float objectMass = weightManager.GetMass();
-            UpdateDisplay(objectMass);
+            float objectMass = weight.GetMass();
+            this.UpdateDisplay(objectMass);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        UpdateDisplay(0);
+        this.UpdateDisplay(0);
     }
 
     /// <summary>
-    /// Updates the scale's display with the given weight.
+    /// Updates the scale's display with the given weight with decimals of 2.
     /// </summary>
     private void UpdateDisplay(float weight)
     {
-        if (weightDisplay != null)
+        if (this.weightDisplay != null)
         {
-            weightDisplay.text = $"{weight:F2} kg";
+            this.weightDisplay.text = $"{weight:F2} kg";
         }
         else
         {
