@@ -11,7 +11,8 @@ public static class MaterialData
     /// </summary>
     private static readonly Dictionary<MaterialType, float> densities = new Dictionary<MaterialType, float>
     {
-        { MaterialType.Copper, 8960f },
+        { MaterialType.Copper, 8944f },
+        { MaterialType.Steel, 7850f },
     };
 
     public static float GetDensity(MaterialType type)

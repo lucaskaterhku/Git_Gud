@@ -15,7 +15,8 @@ public class PerspectiveScaling : MonoBehaviour
             
     private float originalDistance;      
     private float originalScale;        
-    private Vector3 targetScale;       
+    private Vector3 targetScale;   
+    private Quaternion relativeRotation; 
 
     private void Start()
     {   
@@ -56,6 +57,7 @@ public class PerspectiveScaling : MonoBehaviour
         if (Physics.Raycast(this.transform.position, this.transform.forward, out hit, Mathf.Infinity, this.targetMask))
         {
             this.target = hit.transform;
+            this.relativeRotation = Quaternion.Inverse(this.transform.rotation) * this.target.rotation;
 
             Rigidbody rb = this.target.GetComponent<Rigidbody>();
             if (rb != null)
@@ -125,6 +127,7 @@ public class PerspectiveScaling : MonoBehaviour
                     this.targetScale = scaledScale;
                     this.target.localScale = finalScale;
                     this.target.position = offsetPosition;
+                    this.target.rotation = this.transform.rotation * this.relativeRotation;
                     return;
                 }
 
